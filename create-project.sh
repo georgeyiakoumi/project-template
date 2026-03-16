@@ -79,24 +79,29 @@ fi
 echo ""
 
 # ── Project name ──────────────────────────────────────────────
-read -p "$(echo -e ${BOLD})Project name (kebab-case, e.g. client-dashboard): $(echo -e ${RESET})" PROJECT_NAME
+while true; do
+  read -p "$(echo -e ${BOLD})Project name (kebab-case, e.g. client-dashboard): $(echo -e ${RESET})" PROJECT_NAME
 
-if [[ -z "$PROJECT_NAME" ]]; then
-  echo -e "${RED}✗ Project name cannot be empty.${RESET}"
-  exit 1
-fi
+  if [[ -z "$PROJECT_NAME" ]]; then
+    echo -e "${RED}✗ Project name cannot be empty.${RESET}"
+    echo ""
+    continue
+  fi
 
-if [[ ! "$PROJECT_NAME" =~ ^[a-z0-9-]+$ ]]; then
-  echo -e "${RED}✗ Use lowercase letters, numbers, and hyphens only.${RESET}"
-  exit 1
-fi
+  if [[ ! "$PROJECT_NAME" =~ ^[a-z0-9-]+$ ]]; then
+    echo -e "${RED}✗ Use lowercase letters, numbers, and hyphens only.${RESET}"
+    echo ""
+    continue
+  fi
 
-# Check if repo already exists on GitHub
-if gh repo view "georgeyiakoumi/$PROJECT_NAME" &> /dev/null; then
-  echo -e "${RED}✗ A repo named '$PROJECT_NAME' already exists on your GitHub account.${RESET}"
-  echo -e "  Pick a different name or delete the existing repo first."
-  exit 1
-fi
+  if gh repo view "georgeyiakoumi/$PROJECT_NAME" &> /dev/null; then
+    echo -e "${RED}✗ A repo named '$PROJECT_NAME' already exists on your GitHub account.${RESET}"
+    echo ""
+    continue
+  fi
+
+  break
+done
 
 # ── Project type ──────────────────────────────────────────────
 echo ""
