@@ -11,31 +11,46 @@ Before anything else, verify that the required MCPs are reachable. Report the st
 
 **Required connections:**
 
-| MCP | Purpose | Required? |
-|---|---|---|
-| Linear | Project tracking, issues, milestones | Yes |
-| Netlify | Deployment status and environment config | Yes |
-| GitHub | Repo access, branch status, PR state | Yes |
-| Notion | Master plan documentation | Yes |
-| Excalidraw | IA diagrams and user flows | Yes |
+| MCP | Purpose | Required? | When needed |
+|---|---|---|---|
+| Linear | Project tracking, issues, milestones | Yes | Phase 4 onwards |
+| GitHub | Repo access, branch status, PR state | Yes | Phase 4 onwards |
+| Notion | Master plan documentation | Yes | Phase 3 onwards |
+| Excalidraw | IA diagrams and user flows | Yes | Phase 5 (IA/flows) |
+| Netlify | Deployment status and environment config | If project uses Netlify | Deployment stage |
 
-**Run the check:**
-1. Attempt a lightweight call to each MCP (e.g. list projects in Linear, list sites in Netlify, list repos in GitHub, list pages in Notion)
-2. Report status for each: ✅ Connected / ❌ Not reachable / ⚠️ Connected but missing expected resource
-3. If any required MCP is not reachable, **stop and flag it to George** — do not proceed until resolved
-4. Also list any additional MCPs that are connected beyond the required set, in case they're relevant
+**How to check (important — follow this order):**
+
+1. **First, search for available tools** using the tool search / deferred tools mechanism. Cloud MCPs (Linear, Notion, Netlify, Excalidraw, GitHub) are loaded as deferred tools and may not appear until you explicitly search for them. Search for each by name before concluding it's missing.
+
+2. **Then attempt a lightweight call** to each found MCP (e.g. list teams in Linear, search in Notion, list commits in GitHub, read_me in Excalidraw). A successful response confirms the connection is live.
+
+3. **Distinguish between three states:**
+   - ✅ **Connected** — tool found and call succeeded
+   - ⚠️ **Temporarily unavailable** — tool found but call returned an error (502, timeout, etc.). This is usually a transient proxy issue — note it and retry later. Do not block on this.
+   - ❌ **Not configured** — tool not found even after searching. Flag to George.
+
+4. **Do not block project scoping on transient errors.** If an MCP returns a 502 or timeout, note it and proceed. These are cloud-hosted MCPs that may have momentary outages. Only stop if the MCP is genuinely not configured (no tools found at all).
+
+5. Also list any additional MCPs that are connected beyond the required set, in case they're relevant.
 
 **Expected output:**
 ```
 MCP Status
 ──────────
 ✅ Linear     — connected (workspace: [name])
-✅ Netlify    — connected ([n] sites found)
-✅ GitHub     — connected ([n] repos found)
-✅ Notion     — connected (workspace: [name])
+✅ GitHub     — connected (repo: [name])
+✅ Notion     — connected
 ✅ Excalidraw — connected
+✅ Netlify    — connected
 ⚠️ [Other]   — connected but verify it's needed
 ```
+
+**If an MCP is not configured (❌):**
+- Flag it to George with the specific MCP name
+- George can add it via the MCP servers panel in VS Code (Claude Code extension settings)
+- All required MCPs are cloud MCPs managed through the Claude AI integration — they are added via the VS Code extension, not config files
+- Once added, it will be available in all projects automatically
 
 ---
 
