@@ -2,18 +2,14 @@
 
 # ─────────────────────────────────────────────────────────────
 # create-project.sh
-# Creates a new project repo from George's design template,
-# clones it locally, installs dependencies, and opens VS Code.
+# Creates a new project repo from George's design template.
+# Branches scaffold, config, and CLAUDE.md based on project type.
 #
 # Prerequisites:
 #   - GitHub CLI installed and authenticated (gh auth login)
 #   - Node.js 18+ installed
 #   - VS Code CLI installed (code command available)
-#   - T7 Editing external drive mounted
-#
-# Usage:
-#   chmod +x create-project.sh
-#   ./create-project.sh
+#   - T7 Editing external drive mounted (preferred)
 # ─────────────────────────────────────────────────────────────
 
 set -e
@@ -30,6 +26,7 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
+CYAN='\033[0;36m'
 RESET='\033[0m'
 
 echo ""
@@ -42,17 +39,17 @@ echo ""
 echo -e "${BLUE}Checking prerequisites...${RESET}"
 
 if ! command -v gh &> /dev/null; then
-  echo -e "${RED}✗ GitHub CLI (gh) not found. Install it: https://cli.github.com${RESET}"
+  echo -e "${RED}✗ GitHub CLI (gh) not found. Install: https://cli.github.com${RESET}"
   exit 1
 fi
 
 if ! command -v node &> /dev/null; then
-  echo -e "${RED}✗ Node.js not found. Install it: https://nodejs.org${RESET}"
+  echo -e "${RED}✗ Node.js not found. Install: https://nodejs.org${RESET}"
   exit 1
 fi
 
 if ! command -v code &> /dev/null; then
-  echo -e "${YELLOW}⚠ VS Code CLI (code) not found — you'll need to open the project manually.${RESET}"
+  echo -e "${YELLOW}⚠ VS Code CLI (code) not found — open the project manually after.${RESET}"
   VSCODE_AVAILABLE=false
 else
   VSCODE_AVAILABLE=true
@@ -69,7 +66,6 @@ if [ -d "$DRIVE_PATH" ]; then
 else
   echo -e "${YELLOW}⚠ $DRIVE_NAME is not connected.${RESET}"
   echo -e "  Projects will be saved to ${YELLOW}$FALLBACK_DIR${RESET} instead."
-  echo -e "  Connect the drive before running this script to use your preferred location."
   echo ""
   read -p "Continue with fallback location? (y/n): " USE_FALLBACK
   if [[ "$USE_FALLBACK" != "y" && "$USE_FALLBACK" != "Y" ]]; then
@@ -95,6 +91,108 @@ if [[ ! "$PROJECT_NAME" =~ ^[a-z0-9-]+$ ]]; then
   exit 1
 fi
 
+# ── Project type ──────────────────────────────────────────────
+echo ""
+echo -e "${BOLD}What are you building?${RESET}"
+echo -e "  ${CYAN}1)${RESET} Web app        — Next.js + shadcn + Tailwind + Supabase + Netlify"
+echo -e "  ${CYAN}2)${RESET} Marketing site — Next.js + shadcn + Tailwind + Netlify"
+echo -e "  ${CYAN}3)${RESET} Content site   — Next.js + shadcn + Tailwind + Strapi + Render + Netlify"
+echo -e "  ${CYAN}4)${RESET} UI component   — Next.js + shadcn + Tailwind only"
+echo -e "  ${CYAN}5)${RESET} Prototype      — Next.js + shadcn + Tailwind only"
+echo ""
+read -p "$(echo -e ${BOLD})Choose (1-5): $(echo -e ${RESET})" PROJECT_TYPE
+
+case $PROJECT_TYPE in
+  1)
+    PROJECT_TYPE_LABEL="Web app"
+    STACK_SUMMARY="Next.js · shadcn/ui · Tailwind CSS · Supabase · Netlify"
+    USE_SUPABASE=true
+    USE_NETLIFY=true
+    USE_STRAPI=false
+    STACK_BLOCK="| Framework | Next.js (App Router) |
+| Styling | Tailwind CSS |
+| Components | shadcn/ui |
+| Icons | Lucide React |
+| Database | Supabase |
+| Deployment | Netlify |"
+    MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
+| **Notion** | Creating/updating the master plan document |
+| **Netlify** | Checking deployment status and environment config |
+| **GitHub** | Repo access, branch/PR status |
+| **Excalidraw** | Generating IA diagrams and user flows |"
+    ;;
+  2)
+    PROJECT_TYPE_LABEL="Marketing site"
+    STACK_SUMMARY="Next.js · shadcn/ui · Tailwind CSS · Netlify"
+    USE_SUPABASE=false
+    USE_NETLIFY=true
+    USE_STRAPI=false
+    STACK_BLOCK="| Framework | Next.js (App Router) |
+| Styling | Tailwind CSS |
+| Components | shadcn/ui |
+| Icons | Lucide React |
+| Deployment | Netlify |"
+    MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
+| **Notion** | Creating/updating the master plan document |
+| **Netlify** | Checking deployment status and environment config |
+| **GitHub** | Repo access, branch/PR status |
+| **Excalidraw** | Generating IA diagrams and user flows |"
+    ;;
+  3)
+    PROJECT_TYPE_LABEL="Content site"
+    STACK_SUMMARY="Next.js · shadcn/ui · Tailwind CSS · Strapi · Render · Netlify"
+    USE_SUPABASE=true
+    USE_NETLIFY=true
+    USE_STRAPI=true
+    STACK_BLOCK="| Framework | Next.js (App Router) |
+| Styling | Tailwind CSS |
+| Components | shadcn/ui |
+| Icons | Lucide React |
+| CMS | Strapi (subfolder → deployed to Render) |
+| Database | Supabase (used by Strapi) |
+| Deployment | Netlify (frontend) · Render (Strapi) |"
+    MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
+| **Notion** | Creating/updating the master plan document |
+| **Netlify** | Checking frontend deployment status |
+| **GitHub** | Repo access, branch/PR status |
+| **Excalidraw** | Generating IA diagrams and user flows |"
+    ;;
+  4)
+    PROJECT_TYPE_LABEL="UI component"
+    STACK_SUMMARY="Next.js · shadcn/ui · Tailwind CSS"
+    USE_SUPABASE=false
+    USE_NETLIFY=false
+    USE_STRAPI=false
+    STACK_BLOCK="| Framework | Next.js (App Router) |
+| Styling | Tailwind CSS |
+| Components | shadcn/ui |
+| Icons | Lucide React |"
+    MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
+| **Notion** | Creating/updating the master plan document |
+| **GitHub** | Repo access, branch/PR status |
+| **Excalidraw** | Generating IA diagrams and user flows |"
+    ;;
+  5)
+    PROJECT_TYPE_LABEL="Prototype"
+    STACK_SUMMARY="Next.js · shadcn/ui · Tailwind CSS"
+    USE_SUPABASE=false
+    USE_NETLIFY=false
+    USE_STRAPI=false
+    STACK_BLOCK="| Framework | Next.js (App Router) |
+| Styling | Tailwind CSS |
+| Components | shadcn/ui |
+| Icons | Lucide React |"
+    MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
+| **Notion** | Creating/updating the master plan document |
+| **GitHub** | Repo access, branch/PR status |
+| **Excalidraw** | Generating IA diagrams and user flows |"
+    ;;
+  *)
+    echo -e "${RED}✗ Invalid choice. Run the script again and enter 1–5.${RESET}"
+    exit 1
+    ;;
+esac
+
 # ── Visibility ────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}Repo visibility:${RESET}"
@@ -106,10 +204,12 @@ done
 
 # ── Confirm ───────────────────────────────────────────────────
 echo ""
-echo -e "${BOLD}Creating:${RESET}"
-echo -e "  Repo:       ${GREEN}$PROJECT_NAME${RESET} (${VISIBILITY})"
-echo -e "  Template:   ${BLUE}$TEMPLATE_REPO${RESET}"
-echo -e "  Local path: ${BLUE}$ACTIVE_DIR/$PROJECT_NAME${RESET}"
+echo -e "${BOLD}Summary:${RESET}"
+echo -e "  Name:       ${GREEN}$PROJECT_NAME${RESET}"
+echo -e "  Type:       ${CYAN}$PROJECT_TYPE_LABEL${RESET}"
+echo -e "  Stack:      $STACK_SUMMARY"
+echo -e "  Visibility: $VISIBILITY"
+echo -e "  Location:   ${BLUE}$ACTIVE_DIR/$PROJECT_NAME${RESET}"
 echo ""
 read -p "Continue? (y/n): " CONFIRM
 
@@ -118,11 +218,12 @@ if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
   exit 0
 fi
 
-# ── Move to projects dir and create repo ──────────────────────
+# ── Create repo from template ─────────────────────────────────
 cd "$ACTIVE_DIR"
 
 echo ""
 echo -e "${BLUE}Creating GitHub repo from template...${RESET}"
+
 if [ "$VISIBILITY" = "private" ]; then
   gh repo create "$PROJECT_NAME" \
     --template "$TEMPLATE_REPO" \
@@ -136,9 +237,110 @@ else
 fi
 
 echo -e "${GREEN}✓ Repo created and cloned${RESET}"
+cd "$PROJECT_NAME"
 
-# ── Move into project ─────────────────────────────────────────
-cd "$PROJECT_NAME" 2>/dev/null || { echo -e "${RED}✗ Could not find cloned directory.${RESET}"; exit 1; }
+# ── Tailor scaffold based on project type ─────────────────────
+echo ""
+echo -e "${BLUE}Configuring scaffold for: $PROJECT_TYPE_LABEL...${RESET}"
+
+if [ "$USE_SUPABASE" = false ]; then
+  rm -rf supabase
+  rm -f lib/supabase/client.ts lib/supabase/server.ts
+  rmdir lib/supabase 2>/dev/null || true
+  echo -e "  ${YELLOW}↳ Removed Supabase config${RESET}"
+fi
+
+if [ "$USE_NETLIFY" = false ]; then
+  rm -f netlify.toml
+  echo -e "  ${YELLOW}↳ Removed Netlify config${RESET}"
+fi
+
+# Rebuild .env.example to match the stack
+if [ "$USE_SUPABASE" = false ]; then
+  cat > .env.example << 'EOF'
+# ── App ───────────────────────────────────────────────────────
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+EOF
+fi
+
+if [ "$USE_STRAPI" = true ]; then
+  cat >> .env.example << 'EOF'
+
+# ── Strapi ────────────────────────────────────────────────────
+# Set once Strapi is deployed to Render
+NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+STRAPI_API_TOKEN=your-strapi-api-token
+EOF
+
+  mkdir -p strapi
+  cat > strapi/README.md << 'EOF'
+# Strapi CMS
+
+This subfolder contains the Strapi CMS instance for this project.
+
+## Local setup
+
+```bash
+cd strapi
+npx create-strapi-app@latest . --quickstart
+```
+
+## Deploying to Render
+
+1. Push this repo to GitHub
+2. Go to render.com → New Web Service → connect this repo
+3. Set root directory to `strapi`
+4. Build command: `npm run build`
+5. Start command: `npm run start`
+
+Set these environment variables in Render:
+- `DATABASE_URL` — Supabase connection string (Settings → Database → URI)
+- `ADMIN_JWT_SECRET` — run: openssl rand -base64 32
+- `API_TOKEN_SALT`   — run: openssl rand -base64 32
+- `APP_KEYS`         — run: openssl rand -base64 32
+- `JWT_SECRET`       — run: openssl rand -base64 32
+
+Once deployed, copy the Render URL to NEXT_PUBLIC_STRAPI_URL in Netlify env vars.
+EOF
+  echo -e "  ${YELLOW}↳ Added Strapi subfolder — see strapi/README.md to init${RESET}"
+fi
+
+echo -e "${GREEN}✓ Scaffold configured${RESET}"
+
+# ── Inject project identity into CLAUDE.md ────────────────────
+echo ""
+echo -e "${BLUE}Updating CLAUDE.md...${RESET}"
+
+ORIGINAL_CLAUDE=$(cat CLAUDE.md)
+
+cat > CLAUDE.md << EOF
+# Project: $PROJECT_NAME
+**Type:** $PROJECT_TYPE_LABEL
+**Created:** $(date +%Y-%m-%d)
+
+## Stack
+
+| Layer | Tool |
+|---|---|
+$STACK_BLOCK
+
+## Active MCPs
+
+| MCP | When to use |
+|---|---|
+$MCP_BLOCK
+
+**Standing rules:**
+- Log decisions and trade-offs as comments on the relevant Linear issue — not just in conversation
+- If scope changes, update Notion first, then adjust Linear to match
+- Never create Linear issues without a corresponding Notion plan entry
+
+---
+
+$ORIGINAL_CLAUDE
+EOF
+
+echo -e "${GREEN}✓ CLAUDE.md updated${RESET}"
 
 # ── Install dependencies ──────────────────────────────────────
 echo ""
@@ -150,7 +352,12 @@ echo -e "${GREEN}✓ Dependencies installed${RESET}"
 if [ -f ".env.example" ]; then
   cp .env.example .env.local
   echo -e "${GREEN}✓ .env.local created from .env.example${RESET}"
-  echo -e "${YELLOW}  ↳ Fill in your Supabase keys in .env.local before running the dev server${RESET}"
+  if [ "$USE_SUPABASE" = true ]; then
+    echo -e "${YELLOW}  ↳ Fill in Supabase keys in .env.local before starting the dev server${RESET}"
+  fi
+  if [ "$USE_STRAPI" = true ]; then
+    echo -e "${YELLOW}  ↳ Fill in STRAPI_API_TOKEN once Strapi is deployed to Render${RESET}"
+  fi
 fi
 
 # ── Open in VS Code ───────────────────────────────────────────
@@ -164,11 +371,25 @@ if [ "$VSCODE_AVAILABLE" = true ]; then
   echo -e "It will run the project setup routine and check MCP connections."
 else
   echo -e "${YELLOW}Open VS Code manually:${RESET}"
-  echo -e "  cd $(pwd)"
-  echo -e "  code ."
+  echo -e "  cd \"$(pwd)\" && code ."
 fi
 
+# ── Done ──────────────────────────────────────────────────────
 echo ""
-echo -e "${GREEN}${BOLD}All done! Project ready: $PROJECT_NAME${RESET}"
-echo -e "${BLUE}Location: $ACTIVE_DIR/$PROJECT_NAME${RESET}"
+echo -e "${GREEN}${BOLD}╔══════════════════════════════════╗${RESET}"
+echo -e "${GREEN}${BOLD}║     Project ready!               ║${RESET}"
+echo -e "${GREEN}${BOLD}╚══════════════════════════════════╝${RESET}"
+echo ""
+echo -e "  ${BOLD}Name:${RESET}    $PROJECT_NAME"
+echo -e "  ${BOLD}Type:${RESET}    $PROJECT_TYPE_LABEL"
+echo -e "  ${BOLD}Stack:${RESET}   $STACK_SUMMARY"
+echo -e "  ${BOLD}GitHub:${RESET}  https://github.com/georgeyiakoumi/$PROJECT_NAME"
+echo -e "  ${BOLD}Local:${RESET}   $ACTIVE_DIR/$PROJECT_NAME"
+echo ""
+if [ "$USE_SUPABASE" = true ]; then
+  echo -e "  ${YELLOW}→ Fill in .env.local with your Supabase keys${RESET}"
+fi
+if [ "$USE_STRAPI" = true ]; then
+  echo -e "  ${YELLOW}→ cd strapi && npx create-strapi-app@latest . --quickstart${RESET}"
+fi
 echo ""
