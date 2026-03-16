@@ -100,6 +100,18 @@ while true; do
     continue
   fi
 
+  if [ -d "$ACTIVE_DIR/$PROJECT_NAME" ]; then
+    echo -e "${YELLOW}⚠ A folder named '$PROJECT_NAME' already exists at $ACTIVE_DIR${RESET}"
+    read -p "Delete it and continue? (y/n): " DELETE_FOLDER
+    if [[ "$DELETE_FOLDER" == "y" || "$DELETE_FOLDER" == "Y" ]]; then
+      rm -rf "$ACTIVE_DIR/$PROJECT_NAME"
+      echo -e "${GREEN}✓ Deleted $ACTIVE_DIR/$PROJECT_NAME${RESET}"
+    else
+      echo ""
+      continue
+    fi
+  fi
+
   break
 done
 
@@ -228,20 +240,6 @@ read -p "Continue? (y/n): " CONFIRM
 if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
   echo "Aborted."
   exit 0
-fi
-
-# ── Check for existing local folder ───────────────────────────
-if [ -d "$ACTIVE_DIR/$PROJECT_NAME" ]; then
-  echo -e "${YELLOW}⚠ A folder named '$PROJECT_NAME' already exists at $ACTIVE_DIR${RESET}"
-  read -p "Delete it and continue? (y/n): " DELETE_FOLDER
-  if [[ "$DELETE_FOLDER" == "y" || "$DELETE_FOLDER" == "Y" ]]; then
-    rm -rf "$ACTIVE_DIR/$PROJECT_NAME"
-    echo -e "${GREEN}✓ Deleted $ACTIVE_DIR/$PROJECT_NAME${RESET}"
-  else
-    echo -e "  Pick a different name."
-    exec "$0"
-    exit 0
-  fi
 fi
 
 cd "$ACTIVE_DIR"
