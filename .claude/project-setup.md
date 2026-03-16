@@ -17,6 +17,7 @@ Before anything else, verify that the required MCPs are reachable. Report the st
 | Netlify | Deployment status and environment config | Yes |
 | GitHub | Repo access, branch status, PR state | Yes |
 | Notion | Master plan documentation | Yes |
+| Excalidraw | IA diagrams and user flows | Yes |
 
 **Run the check:**
 1. Attempt a lightweight call to each MCP (e.g. list projects in Linear, list sites in Netlify, list repos in GitHub, list pages in Notion)
@@ -32,6 +33,7 @@ MCP Status
 ✅ Netlify    — connected ([n] sites found)
 ✅ GitHub     — connected ([n] repos found)
 ✅ Notion     — connected (workspace: [name])
+✅ Excalidraw — connected
 ⚠️ [Other]   — connected but verify it's needed
 ```
 
