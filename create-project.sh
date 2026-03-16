@@ -430,7 +430,14 @@ import { MagnifyingGlass, Gear, CaretRight, Trash } from "@phosphor-icons/react"
 - [ ] Interactive icons have a minimum 44×44px touch target (use `p-2` padding on the wrapper)
 - [ ] Primary actions have a visible text label alongside the icon
 - [ ] Icon-only buttons have an `aria-label`
-- [ ] Decorative icons have `aria-hidden="true"`'
+- [ ] Decorative icons have `aria-hidden="true"`
+
+**After adding shadcn components:**
+shadcn components ship with Lucide imports by default. After running `npx shadcn add`, run:
+```bash
+npm run swap-icons
+```
+This replaces all Lucide references in `components/ui/` with Phosphor equivalents automatically.'
 
   elif [ "$ICON_PKG" = "@tabler/icons-react" ]; then
     ICON_SECTION='## Iconography
@@ -492,7 +499,14 @@ import { IconStarFilled } from "@tabler/icons-react"
 - [ ] Interactive icons have a minimum 44×44px touch target (use `p-2` padding on the wrapper)
 - [ ] Primary actions have a visible text label alongside the icon
 - [ ] Icon-only buttons have an `aria-label`
-- [ ] Decorative icons have `aria-hidden="true"`'
+- [ ] Decorative icons have `aria-hidden="true"`
+
+**After adding shadcn components:**
+shadcn components ship with Lucide imports by default. After running `npx shadcn add`, run:
+```bash
+npm run swap-icons
+```
+This replaces all Lucide references in `components/ui/` with Tabler equivalents automatically.'
   fi
 
   # Replace the Iconography section in ui-standards.md
@@ -839,5 +853,8 @@ if [ "$USE_SUPABASE" = true ]; then
 fi
 if [ "$USE_STRAPI" = true ]; then
   echo -e "  ${YELLOW}→ cd strapi && npx create-strapi-app@latest . --quickstart${RESET}"
+fi
+if [ "$ICON_SWAP" = true ]; then
+  echo -e "  ${YELLOW}→ After adding shadcn components: npm run swap-icons${RESET}"
 fi
 echo ""
