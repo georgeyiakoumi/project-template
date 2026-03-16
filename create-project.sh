@@ -365,6 +365,237 @@ EOF
 
 echo -e "${GREEN}✓ CLAUDE.md updated${RESET}"
 
+# ── Rewrite README.md for this project type ───────────────────
+echo -e "${BLUE}Updating README.md...${RESET}"
+
+# Build env vars section
+if [ "$USE_SUPABASE" = true ] && [ "$USE_STRAPI" = true ]; then
+  ENV_SECTION='After the script runs, open `.env.local` and fill in your credentials:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
+STRAPI_API_TOKEN=your-strapi-api-token
+```
+
+Find Supabase keys under **Settings → API** in your Supabase project. Strapi keys are set once Strapi is deployed to Render.'
+elif [ "$USE_SUPABASE" = true ]; then
+  ENV_SECTION='After the script runs, open `.env.local` and fill in your Supabase credentials:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+Find these in your Supabase project under **Settings → API**.'
+else
+  ENV_SECTION='After the script runs, `.env.local` is ready to go:
+
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+No external services to configure.'
+fi
+
+# Build deployment section
+if [ "$USE_NETLIFY" = true ] && [ "$USE_STRAPI" = true ]; then
+  DEPLOY_SECTION='## Deployment
+
+### Frontend (Netlify)
+
+Configured via `netlify.toml`. To connect:
+
+1. Push the repo to GitHub
+2. Go to [netlify.com](https://netlify.com) → Add new site → Import from GitHub
+3. Select the repo — build settings are pre-configured
+4. Add environment variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_STRAPI_URL`, `STRAPI_API_TOKEN`
+5. Deploy
+
+### Strapi CMS (Render)
+
+See `strapi/README.md` for full setup instructions.'
+elif [ "$USE_NETLIFY" = true ]; then
+  DEPLOY_SECTION="## Deployment
+
+Configured for Netlify via \`netlify.toml\`. To connect:
+
+1. Push the repo to GitHub
+2. Go to [netlify.com](https://netlify.com) → Add new site → Import from GitHub
+3. Select the repo — build settings are pre-configured
+4. Add environment variables in **Site → Environment variables**
+5. Deploy"
+else
+  DEPLOY_SECTION='## Running locally
+
+```bash
+npm run dev
+```
+
+No deployment target is configured. Add one when you are ready to ship.'
+fi
+
+# Build repo structure section
+if [ "$USE_SUPABASE" = true ] && [ "$USE_STRAPI" = true ]; then
+  STRUCTURE_SECTION='```
+├── CLAUDE.md
+├── .claude/
+│   ├── project-setup.md
+│   ├── design-psychology.md
+│   ├── ui-standards.md
+│   └── ux-process.md
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/ui/
+├── lib/
+│   ├── utils.ts
+│   └── supabase/
+│       ├── client.ts
+│       └── server.ts
+├── strapi/
+│   └── README.md
+├── supabase/
+│   └── config.toml
+├── public/
+├── .env.example
+├── netlify.toml
+├── package.json
+├── tailwind.config.ts
+└── tsconfig.json
+```'
+elif [ "$USE_SUPABASE" = true ]; then
+  STRUCTURE_SECTION='```
+├── CLAUDE.md
+├── .claude/
+│   ├── project-setup.md
+│   ├── design-psychology.md
+│   ├── ui-standards.md
+│   └── ux-process.md
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/ui/
+├── lib/
+│   ├── utils.ts
+│   └── supabase/
+│       ├── client.ts
+│       └── server.ts
+├── supabase/
+│   └── config.toml
+├── public/
+├── .env.example
+├── netlify.toml
+├── package.json
+├── tailwind.config.ts
+└── tsconfig.json
+```'
+elif [ "$USE_NETLIFY" = true ]; then
+  STRUCTURE_SECTION='```
+├── CLAUDE.md
+├── .claude/
+│   ├── project-setup.md
+│   ├── design-psychology.md
+│   ├── ui-standards.md
+│   └── ux-process.md
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/ui/
+├── lib/
+│   └── utils.ts
+├── public/
+├── .env.example
+├── netlify.toml
+├── package.json
+├── tailwind.config.ts
+└── tsconfig.json
+```'
+else
+  STRUCTURE_SECTION='```
+├── CLAUDE.md
+├── .claude/
+│   ├── project-setup.md
+│   ├── design-psychology.md
+│   ├── ui-standards.md
+│   └── ux-process.md
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/ui/
+├── lib/
+│   └── utils.ts
+├── public/
+├── .env.example
+├── package.json
+├── tailwind.config.ts
+└── tsconfig.json
+```'
+fi
+
+cat > README.md << EOF
+# $PROJECT_NAME
+
+**Type:** $PROJECT_TYPE_LABEL
+**Stack:** $STACK_SUMMARY
+
+---
+
+## Getting started
+
+\`\`\`bash
+npm run dev
+\`\`\`
+
+Open [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Environment variables
+
+$ENV_SECTION
+
+---
+
+$DEPLOY_SECTION
+
+---
+
+## Repo structure
+
+$STRUCTURE_SECTION
+
+---
+
+## Adding shadcn components
+
+\`\`\`bash
+npx shadcn add button
+npx shadcn add card dialog select table tabs
+\`\`\`
+
+Components land in \`components/ui/\` and inherit your brand tokens automatically.
+
+---
+
+## Applying your brand
+
+**\`app/globals.css\`** — update the HSL values for \`--primary\`, \`--accent\`, \`--radius\`, and any other shadcn tokens.
+
+**\`tailwind.config.ts\`** — update \`fontFamily.sans\` to your chosen typeface. Add the font import to \`layout.tsx\` using \`next/font\`.
+
+Both light (\`:root\`) and dark (\`.dark\`) variants are pre-wired. Update both when changing colours.
+EOF
+
+echo -e "${GREEN}✓ README.md updated${RESET}"
+
 # ── Install dependencies ──────────────────────────────────────
 echo ""
 echo -e "${BLUE}Installing dependencies...${RESET}"
