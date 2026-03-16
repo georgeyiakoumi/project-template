@@ -190,7 +190,7 @@ case $PROJECT_TYPE in
     STACK_BLOCK="| Framework | Next.js (App Router) |
 | Styling | Tailwind CSS |
 | Components | shadcn/ui |
-| Icons | $ICON_LABEL |"
+| Icons | Lucide React |"
     MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
 | **Notion** | Creating/updating the master plan document |
 | **GitHub** | Repo access, branch/PR status |
@@ -205,7 +205,7 @@ case $PROJECT_TYPE in
     STACK_BLOCK="| Framework | Next.js (App Router) |
 | Styling | Tailwind CSS |
 | Components | shadcn/ui |
-| Icons | $ICON_LABEL |"
+| Icons | Lucide React |"
     MCP_BLOCK="| **Linear** | Creating/updating issues, logging decisions, tracking progress |
 | **Notion** | Creating/updating the master plan document |
 | **GitHub** | Repo access, branch/PR status |
@@ -214,39 +214,6 @@ case $PROJECT_TYPE in
   *)
     echo -e "${RED}✗ Invalid choice. Run the script again and enter 1–5.${RESET}"
     exit 1
-    ;;
-esac
-
-# ── Icon library ──────────────────────────────────────────────
-echo ""
-echo -e "${BOLD}Icon library:${RESET}"
-echo -e "  ${CYAN}1)${RESET} Lucide React    — Clean line icons (shadcn default, ~1,500 icons)"
-echo -e "  ${CYAN}2)${RESET} Phosphor Icons  — 6 weights inc. duotone (1,248 icons, high personality)"
-echo -e "  ${CYAN}3)${RESET} Tabler Icons    — Largest free set (6,074 icons, outline + filled)"
-echo ""
-read -p "$(echo -e ${BOLD})Choose (1-3): $(echo -e ${RESET})" ICON_CHOICE
-
-case $ICON_CHOICE in
-  1)
-    ICON_LABEL="Lucide React"
-    ICON_PKG="lucide-react"
-    ICON_SWAP=false
-    ;;
-  2)
-    ICON_LABEL="Phosphor Icons"
-    ICON_PKG="@phosphor-icons/react"
-    ICON_SWAP=true
-    ;;
-  3)
-    ICON_LABEL="Tabler Icons"
-    ICON_PKG="@tabler/icons-react"
-    ICON_SWAP=true
-    ;;
-  *)
-    echo -e "${YELLOW}⚠ Invalid choice — defaulting to Lucide React.${RESET}"
-    ICON_LABEL="Lucide React"
-    ICON_PKG="lucide-react"
-    ICON_SWAP=false
     ;;
 esac
 
@@ -264,7 +231,6 @@ echo ""
 echo -e "${BOLD}Summary:${RESET}"
 echo -e "  Name:       ${GREEN}$PROJECT_NAME${RESET}"
 echo -e "  Type:       ${CYAN}$PROJECT_TYPE_LABEL${RESET}"
-echo -e "  Icons:      $ICON_LABEL"
 echo -e "  Stack:      $STACK_SUMMARY"
 echo -e "  Visibility: $VISIBILITY"
 echo -e "  Location:   ${BLUE}$ACTIVE_DIR/$PROJECT_NAME${RESET}"
@@ -360,180 +326,6 @@ Set these environment variables in Render:
 Once deployed, copy the Render URL to NEXT_PUBLIC_STRAPI_URL in Netlify env vars.
 EOF
   echo -e "  ${YELLOW}↳ Added Strapi subfolder — see strapi/README.md to init${RESET}"
-fi
-
-# Swap icon library if not Lucide
-if [ "$ICON_SWAP" = true ]; then
-  # Replace lucide-react with chosen package in package.json
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s/\"lucide-react\": \"[^\"]*\"/\"$ICON_PKG\": \"latest\"/" package.json
-  else
-    sed -i "s/\"lucide-react\": \"[^\"]*\"/\"$ICON_PKG\": \"latest\"/" package.json
-  fi
-  echo -e "  ${YELLOW}↳ Swapped lucide-react → $ICON_PKG${RESET}"
-
-  # Rewrite the Iconography section in ui-standards.md
-  if [ "$ICON_PKG" = "@phosphor-icons/react" ]; then
-    ICON_SECTION='## Iconography
-
-**The principle:** Phosphor Icons exclusively. Do not mix in Lucide, Heroicons, or any other library. Phosphor provides six weights from a single icon set, enabling nuanced visual hierarchy.
-
-**Usage:**
-```tsx
-import { MagnifyingGlass, Gear, CaretRight, Trash } from "@phosphor-icons/react"
-
-// Standard sizing — use the size prop or className
-<MagnifyingGlass className="size-4" />            // inline / small UI
-<Gear className="size-5" />                       // default for most contexts
-<CaretRight className="size-6" />                 // prominent / navigation
-
-// With weight variants
-<Gear className="size-5" weight="duotone" />      // featured / personality
-<Gear className="size-5" weight="bold" />         // primary actions
-<Gear className="size-5" weight="light" />        // decorative / subtle
-
-// With colour token
-<Trash className="size-4 text-destructive" />
-<MagnifyingGlass className="size-4 text-muted-foreground" />
-```
-
-**Available weights:**
-
-| Weight | Use for |
-|---|---|
-| `thin` | Very subtle, decorative only |
-| `light` | Supporting / secondary UI |
-| `regular` | Default for most contexts |
-| `bold` | Primary actions, emphasis |
-| `fill` | Solid variant, active/selected states |
-| `duotone` | Featured areas, personality moments — the signature Phosphor style |
-
-**Sizing conventions:**
-
-| Context | Size class |
-|---|---|
-| Inline in text / buttons | `size-4` |
-| Default UI (nav, list items) | `size-5` |
-| Prominent actions, empty states | `size-6` |
-| Decorative / illustration-weight | `size-8` or `size-10` |
-
-**Rules:**
-- Minimum touch target for interactive icons: wrap in a button with `p-2` padding to reach 44×44px
-- Always pair icons with a visible label for primary actions — icon-only acceptable only for universally understood symbols (`X`, magnifying glass, caret left) or persistent nav with nearby labels
-- Use `text-muted-foreground` for decorative/supporting icons, `text-foreground` for primary, `text-destructive` for destructive
-- Add `aria-label` to icon-only interactive elements; add `aria-hidden="true"` to decorative icons
-- Pick a primary weight (e.g. `regular`) for general UI and reserve `duotone` or `bold` for emphasis — do not mix weights randomly
-
-**Icon checklist:**
-- [ ] All icons imported from `@phosphor-icons/react` — no other sources
-- [ ] A primary weight is chosen and used consistently across the UI
-- [ ] Interactive icons have a minimum 44×44px touch target (use `p-2` padding on the wrapper)
-- [ ] Primary actions have a visible text label alongside the icon
-- [ ] Icon-only buttons have an `aria-label`
-- [ ] Decorative icons have `aria-hidden="true"`
-
-**After adding shadcn components:**
-shadcn components ship with Lucide imports by default. After running `npx shadcn add`, run:
-```bash
-npm run swap-icons
-```
-This replaces all Lucide references in `components/ui/` with Phosphor equivalents automatically.'
-
-  elif [ "$ICON_PKG" = "@tabler/icons-react" ]; then
-    ICON_SECTION='## Iconography
-
-**The principle:** Tabler Icons exclusively. Do not mix in Lucide, Heroicons, Phosphor, or any other library. Tabler is the largest free icon set (6,074 icons) with consistent stroke weight and both outline and filled variants.
-
-**Usage:**
-```tsx
-import { IconSearch, IconSettings, IconChevronRight, IconTrash } from "@tabler/icons-react"
-
-// Standard sizing — use className
-<IconSearch className="size-4" />            // inline / small UI
-<IconSettings className="size-5" />          // default for most contexts
-<IconChevronRight className="size-6" />      // prominent / navigation
-
-// Adjusting stroke weight
-<IconSettings className="size-5" stroke={1.5} />  // default stroke
-<IconSettings className="size-5" stroke={1} />    // thinner, more elegant
-<IconSettings className="size-5" stroke={2} />    // bolder, more prominent
-
-// With colour token
-<IconTrash className="size-4 text-destructive" />
-<IconSearch className="size-4 text-muted-foreground" />
-
-// Filled variants (where available)
-import { IconStarFilled } from "@tabler/icons-react"
-<IconStarFilled className="size-5 text-primary" />
-```
-
-**Sizing conventions:**
-
-| Context | Size class |
-|---|---|
-| Inline in text / buttons | `size-4` |
-| Default UI (nav, list items) | `size-5` |
-| Prominent actions, empty states | `size-6` |
-| Decorative / illustration-weight | `size-8` or `size-10` |
-
-**Stroke weight conventions:**
-
-| Context | Stroke |
-|---|---|
-| Default UI | `1.5` (default, no prop needed) |
-| Elegant / light feel | `1` |
-| Bold / emphasis | `2` |
-
-**Rules:**
-- All Tabler icons use the `Icon` prefix: `IconSearch`, `IconHome`, `IconSettings`
-- Filled variants append `Filled`: `IconStarFilled`, `IconHeartFilled`
-- Minimum touch target for interactive icons: wrap in a button with `p-2` padding to reach 44×44px
-- Always pair icons with a visible label for primary actions — icon-only acceptable only for universally understood symbols (`IconX`, `IconSearch`, `IconChevronLeft`) or persistent nav with nearby labels
-- Use `text-muted-foreground` for decorative/supporting icons, `text-foreground` for primary, `text-destructive` for destructive
-- Add `aria-label` to icon-only interactive elements; add `aria-hidden="true"` to decorative icons
-- Pick a consistent stroke weight for general UI — do not mix stroke weights randomly
-
-**Icon checklist:**
-- [ ] All icons imported from `@tabler/icons-react` — no other sources
-- [ ] A consistent stroke weight is used across the UI (default 1.5 unless intentionally varied)
-- [ ] Interactive icons have a minimum 44×44px touch target (use `p-2` padding on the wrapper)
-- [ ] Primary actions have a visible text label alongside the icon
-- [ ] Icon-only buttons have an `aria-label`
-- [ ] Decorative icons have `aria-hidden="true"`
-
-**After adding shadcn components:**
-shadcn components ship with Lucide imports by default. After running `npx shadcn add`, run:
-```bash
-npm run swap-icons
-```
-This replaces all Lucide references in `components/ui/` with Tabler equivalents automatically.'
-  fi
-
-  # Replace the Iconography section in ui-standards.md
-  # Use a temp file approach for reliable multiline replacement
-  python3 -c "
-import re
-with open('.claude/ui-standards.md', 'r') as f:
-    content = f.read()
-pattern = r'## Iconography.*?(?=\n---\n)'
-replacement = '''$ICON_SECTION'''
-content = re.sub(pattern, replacement, content, flags=re.DOTALL)
-with open('.claude/ui-standards.md', 'w') as f:
-    f.write(content)
-"
-  echo -e "  ${YELLOW}↳ Updated ui-standards.md for $ICON_LABEL${RESET}"
-
-  # Update Lucide references in CLAUDE.md and project-setup.md
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s/Lucide React/$ICON_LABEL/g" CLAUDE.md
-    sed -i '' "s/Lucide icons only/$ICON_LABEL only/g" .claude/project-setup.md
-    sed -i '' "s/shadcn · Tailwind · Lucide/shadcn · Tailwind · $ICON_LABEL/g" CLAUDE.md
-  else
-    sed -i "s/Lucide React/$ICON_LABEL/g" CLAUDE.md
-    sed -i "s/Lucide icons only/$ICON_LABEL only/g" .claude/project-setup.md
-    sed -i "s/shadcn · Tailwind · Lucide/shadcn · Tailwind · $ICON_LABEL/g" CLAUDE.md
-  fi
-  echo -e "  ${YELLOW}↳ Updated icon references in CLAUDE.md and project-setup.md${RESET}"
 fi
 
 echo -e "${GREEN}✓ Scaffold configured${RESET}"
@@ -853,8 +645,5 @@ if [ "$USE_SUPABASE" = true ]; then
 fi
 if [ "$USE_STRAPI" = true ]; then
   echo -e "  ${YELLOW}→ cd strapi && npx create-strapi-app@latest . --quickstart${RESET}"
-fi
-if [ "$ICON_SWAP" = true ]; then
-  echo -e "  ${YELLOW}→ After adding shadcn components: npm run swap-icons${RESET}"
 fi
 echo ""

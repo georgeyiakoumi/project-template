@@ -15,6 +15,7 @@ These are the activities that happen before pixels — and the ones that make pi
 | User stories | **Notion → Linear** | Written in Notion first; each story then mirrored as a Linear issue |
 | Information architecture (site maps) | **Excalidraw** | Generated via MCP; link embedded in the relevant Notion page |
 | User flows | **Excalidraw** | Generated via MCP; one board per flow, link embedded in Notion |
+| Brand identity (tone, colour, type, icons) | **Notion** | One page in the master plan; decisions flow into `globals.css`, `tailwind.config.ts`, and `ui-standards.md` |
 | Usability test plans + findings | **Notion** | One page per test round, findings logged with severity ratings |
 
 ---
@@ -115,6 +116,202 @@ Quote:            [A representative thing they said in research — real or comp
 - Personas that live in a deck and are never referenced again
 
 **Where it lives:** Notion — one page per persona using the structure above. Link all persona pages from the master plan. Reference persona names explicitly in Linear issue descriptions and design reviews.
+
+---
+
+## Brand Identity
+
+**The principle:** Brand identity is established before any UI work begins. It is not decoration applied at the end — it is a set of decisions that constrain and guide every visual and verbal choice. Tone of voice shapes copy. Colour psychology shapes the palette. Typography shapes hierarchy and personality. Icon style shapes interaction feel. These decisions are made together, as a system, not piecemeal.
+
+### Tone of voice
+
+Tone defines how the product speaks. It influences every piece of copy — from headings to button labels to error messages to empty states.
+
+**Tone definition format:**
+```
+Personality traits:  [3–5 adjectives — e.g. confident, approachable, concise, warm, expert]
+Formality:           [Casual ←——→ Formal — pick a point on the scale]
+Humour:              [None / Light / Present — and when to use it]
+Audience assumption: [What does the reader already know? What needs explaining?]
+```
+
+**Tone do/don't format (write 3–5 of each):**
+```
+DO:    "Get started in under a minute" — direct, benefit-led, concise
+DON'T: "Welcome to our platform! We're so excited to have you here" — filler, no information
+```
+
+**Where tone applies:**
+- Headings and subheadings
+- Button labels and CTAs
+- Form labels and placeholder text
+- Error messages and validation
+- Empty states and onboarding
+- Notifications and confirmation messages
+- Metadata and helper text
+
+**Questions to ask:**
+- If this product were a person, how would they talk?
+- What's the one word a user would use to describe how this product communicates?
+- Are we talking to experts or beginners? Does that change across different parts of the product?
+
+### Colour direction
+
+Colour decisions are driven by colour psychology (see `design-psychology.md`) and mapped to shadcn CSS variable tokens. The palette is not aesthetic preference — it is communication.
+
+**Colour decision process:**
+1. **Start with psychology** — what emotions and associations does the brand need to convey? (trustworthy → blue, energetic → orange, premium → dark/gold, natural → green)
+2. **Choose a primary hue** — this becomes `--primary`. It carries the brand's core identity.
+3. **Choose a secondary/accent hue** — this becomes `--accent`. It complements or contrasts the primary for emphasis moments.
+4. **Define the neutral scale** — warm neutrals (friendly, organic), cool neutrals (professional, technical), or true greys (minimal, modern).
+5. **Set destructive** — typically red, but the shade should harmonise with the palette.
+6. **Test contrast** — all pairings must meet WCAG AA (4.5:1 body text, 3:1 large text / UI).
+7. **Define both modes** — light (`:root`) and dark (`.dark`) variants in `globals.css`.
+
+**Colour output format:**
+```
+Primary:     [Hue + rationale — e.g. "Deep blue (#1e40af) — trust, stability, professionalism"]
+Accent:      [Hue + rationale — e.g. "Amber (#f59e0b) — warmth, optimism, call to action"]
+Neutrals:    [Warm / Cool / True grey + rationale]
+Destructive: [Shade + note on harmony with palette]
+Radius:      [Sharp 0.25rem / Default 0.5rem / Rounded 0.75rem — and why]
+```
+
+**Where it lands in code:** `app/globals.css` — edit the HSL values for `:root` and `.dark`. Use [ui.shadcn.com/themes](https://ui.shadcn.com/themes) to generate a full token set visually, then fine-tune.
+
+### Typography system
+
+Font choices shape how the product feels before a single word is read. Typography is selected based on brand personality, then configured in the codebase.
+
+**Font role decisions:**
+
+| Pattern | When to use | Example |
+|---|---|---|
+| 1 sans for everything | Apps, dashboards, tools — clean and functional | Inter |
+| 1 display for headings + 1 sans for body | Marketing sites, landing pages — adds hierarchy and character | Clash Display + Inter |
+| + 1 mono for code | Any project with code blocks or technical content | JetBrains Mono |
+| + 1 serif for long-form | Content-heavy sites, editorial, blogs — readability for sustained reading | Lora, Merriweather |
+
+**Font selection process:**
+1. **Define personality** — refer to the brand personality traits. Is it geometric and modern? Humanist and warm? High-contrast and editorial?
+2. **Pick the primary font** — this is the body font that carries 80% of the text. Prioritise readability, x-height, and character at `text-sm` / `text-base`.
+3. **Pick supporting fonts** — heading font (if different) should contrast the body font in weight, width, or style. Do not pair two fonts from the same category (e.g. two geometric sans).
+4. **Test the pairing** — check at `text-xs` through `text-4xl`. Do they share a compatible x-height? Do they feel like they belong together?
+5. **Source from Google Fonts** — all fonts must be free and available via `next/font/google` for zero-layout-shift loading.
+
+**Font pairing principles:**
+- **Contrast over similarity** — pair a geometric sans with a humanist serif, not two geometric sans
+- **Match x-height** — fonts with similar x-heights look harmonious at the same size
+- **Era compatibility** — a 1920s display face with a 2020s geometric sans can feel disjointed unless intentional
+- **Weight range** — ensure the font family offers enough weights (at minimum: 400, 500, 600, 700)
+- **Language support** — verify the font covers the character sets your users need
+
+**Font personality reference:**
+
+| Personality | Font direction | Google Fonts examples |
+|---|---|---|
+| Modern & minimal | Geometric sans | Inter, Geist, DM Sans, Plus Jakarta Sans |
+| Warm & approachable | Humanist / rounded sans | Nunito, Quicksand, Rubik, Outfit |
+| Bold & expressive | High-impact display | Clash Display, Space Grotesk, Syne, Unbounded |
+| Editorial & refined | Serif or serif + sans pair | Playfair Display, Fraunces, Libre Baskerville |
+| Technical & precise | Monospace-influenced | IBM Plex Sans, JetBrains Mono, Source Code Pro |
+| Playful & creative | Quirky or hand-drawn feel | Baloo 2, Fredoka, Patrick Hand |
+
+**Typography output format:**
+```
+Body (sans):     [Font name — rationale tied to personality]
+Headings:        [Font name or "same as body" — rationale]
+Mono (if needed): [Font name — for code blocks, technical content]
+Long-form (if needed): [Font name — for articles, blog posts]
+```
+
+**Where it lands in code:**
+1. `app/layout.tsx` — import fonts via `next/font/google`, assign CSS variables
+2. `tailwind.config.ts` — map CSS variables to `fontFamily.sans`, `fontFamily.serif`, `fontFamily.mono`
+3. `app/globals.css` — apply the font variable to `body` (already wired by shadcn)
+
+**Implementation pattern:**
+```tsx
+// layout.tsx
+import { Inter, Playfair_Display } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-heading',
+})
+
+export default function RootLayout({ children }) {
+  return (
+    <html className={`${inter.variable} ${playfair.variable}`}>
+      <body>{children}</body>
+    </html>
+  )
+}
+```
+
+```ts
+// tailwind.config.ts
+fontFamily: {
+  sans: ['var(--font-sans)', ...fontFamily.sans],
+  heading: ['var(--font-heading)', ...fontFamily.sans],
+}
+```
+
+### Icon style
+
+Icon style is a brand decision, not a technical default. The icon library should match the product's personality.
+
+**Available libraries:**
+
+| Library | Style | Personality fit | Package |
+|---|---|---|---|
+| Lucide React | Clean line icons, 1 weight | Minimal, neutral, functional | `lucide-react` (shadcn default) |
+| Phosphor Icons | 6 weights inc. duotone | Layered, modern, expressive | `@phosphor-icons/react` |
+| Tabler Icons | Outline + filled, adjustable stroke | Versatile, professional, comprehensive | `@tabler/icons-react` |
+
+**Icon decision process:**
+1. **Match to personality** — clean and minimal → Lucide. Modern with personality → Phosphor (duotone). Bold and expressive → Tabler (filled) or Phosphor (bold).
+2. **Consider weight needs** — if the UI needs subtle decorative icons AND bold action icons, Phosphor's 6 weights give the most range from a single set.
+3. **Confirm** — once chosen, the icon library is exclusive. Do not mix libraries.
+
+**If switching from Lucide (the default):**
+1. Install the new package: `npm install @phosphor-icons/react` or `npm install @tabler/icons-react`
+2. Remove Lucide: `npm uninstall lucide-react`
+3. Swap existing shadcn component icons: `npm run swap-icons`
+4. Update `ui-standards.md` Iconography section to match the new library
+5. Update the Icons row in `CLAUDE.md` stack table
+
+**Icon output format:**
+```
+Library:         [Name — rationale tied to personality]
+Primary weight:  [e.g. "regular" for Phosphor, "1.5 stroke" for Tabler, default for Lucide]
+Accent weight:   [e.g. "duotone" for featured moments, "filled" for active states]
+```
+
+**Where it lives:** Notion — brand identity page in the master plan. Icon decision documented alongside tone, colour, and typography so the full system is visible in one place.
+
+### Bringing it together
+
+All four brand decisions — tone, colour, typography, icons — should be presented as a cohesive proposal and documented on a single Notion page titled `[Project Name] — Brand Identity`. This page is linked from the master plan and referenced throughout design and development.
+
+**Brand identity review format:**
+```
+Tone:       [3–5 personality traits + formality level]
+Colour:     [Primary + accent + neutral direction + rationale]
+Typography: [Font roles + specific fonts + rationale]
+Icons:      [Library + primary weight + rationale]
+Radius:     [Sharp / Default / Rounded + rationale]
+```
+
+**Questions to ask before finalising:**
+- Do all four decisions tell the same story about the brand?
+- If you showed someone just the colour palette, font pairing, and icon style — with no copy — would they guess the product's personality correctly?
+- Does the tone of voice feel natural coming from a product that looks like this?
 
 ---
 

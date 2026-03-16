@@ -145,9 +145,10 @@ Load [`ux-process.md`](./ux-process.md). Before any interface is designed, the f
 1. **Research** — what do we know about the users? What assumptions need validating? → Document findings in **Notion** (one page per research round)
 2. **Strategy** — does the feature align to a clear user goal and business outcome? → Record in the **Notion** master plan under Goals and Design principles
 3. **Personas** — which persona(s) does this task serve? Reference them in every design decision → One **Notion** page per persona, linked from the master plan
-4. **User stories** — write stories for all in-scope functionality before opening Figma or writing code → Draft in **Notion** first, then mirror each story as a **Linear** issue
-5. **Information architecture** — define the structure and navigation before laying out screens → Generate as an **Excalidraw** board via MCP; embed link in Notion
-6. **User flows** — map the full flow (happy path + errors + edge cases) before designing individual screens → Generate as an **Excalidraw** board via MCP (one board per flow); embed link in Notion and the relevant Linear issue
+4. **Brand identity** — establish tone of voice, colour direction, typography system, and icon style as a cohesive set → Document on a **Notion** page titled `[Project Name] — Brand Identity`, linked from the master plan. Then configure: colours in `globals.css`, fonts in `layout.tsx` + `tailwind.config.ts`, icon library swap if needed via `npm run swap-icons`
+5. **User stories** — write stories for all in-scope functionality before opening Figma or writing code → Draft in **Notion** first, then mirror each story as a **Linear** issue
+6. **Information architecture** — define the structure and navigation before laying out screens → Generate as an **Excalidraw** board via MCP; embed link in Notion
+7. **User flows** — map the full flow (happy path + errors + edge cases) before designing individual screens → Generate as an **Excalidraw** board via MCP (one board per flow); embed link in Notion and the relevant Linear issue
 
 Do not proceed to Stage 2 until flows are mapped and reviewed.
 
@@ -161,13 +162,13 @@ Load [`design-psychology.md`](./design-psychology.md). Before producing any UI, 
 Design psychology continues to apply through Stage 3. It is not a one-time gate.
 
 ### Stage 3 — UI standards (last)
-Load [`ui-standards.md`](./ui-standards.md). Only once structure and psychology have been validated, apply the visual layer:
+Load [`ui-standards.md`](./ui-standards.md). Only once structure and psychology have been validated, apply the visual layer using the brand identity decisions from Stage 1:
 
 1. **Layout** — translate flows into screen layouts using Tailwind grid/flex
 2. **Components** — reach for shadcn primitives first; compose or extend as needed
-3. **Colour** — apply shadcn tokens; verify dark mode and WCAG AA contrast
-4. **Typography** — apply the Tailwind type scale; confirm hierarchy is clear
-5. **Iconography** — Lucide icons only; confirm sizing (`size-*`), labels, and accessibility attributes
+3. **Colour** — apply the brand palette via shadcn tokens in `globals.css`; verify dark mode and WCAG AA contrast
+4. **Typography** — apply the brand's font system; confirm hierarchy reads clearly across the type scale
+5. **Iconography** — use the project's chosen icon library; confirm sizing (`size-*`), labels, and accessibility attributes
 6. **Spacing** — apply Tailwind spacing scale; confirm groupings read correctly
 
 ### Throughout all stages
