@@ -91,6 +91,13 @@ if [[ ! "$PROJECT_NAME" =~ ^[a-z0-9-]+$ ]]; then
   exit 1
 fi
 
+# Check if repo already exists on GitHub
+if gh repo view "georgeyiakoumi/$PROJECT_NAME" &> /dev/null; then
+  echo -e "${RED}✗ A repo named '$PROJECT_NAME' already exists on your GitHub account.${RESET}"
+  echo -e "  Pick a different name or delete the existing repo first."
+  exit 1
+fi
+
 # ── Project type ──────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}What are you building?${RESET}"
@@ -219,6 +226,12 @@ if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
 fi
 
 # ── Create repo from template ─────────────────────────────────
+if [ -d "$ACTIVE_DIR/$PROJECT_NAME" ]; then
+  echo -e "${RED}✗ A folder named '$PROJECT_NAME' already exists at $ACTIVE_DIR${RESET}"
+  echo -e "  Remove it or pick a different name."
+  exit 1
+fi
+
 cd "$ACTIVE_DIR"
 
 echo ""
