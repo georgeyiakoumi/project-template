@@ -123,10 +123,17 @@ cd "$ACTIVE_DIR"
 
 echo ""
 echo -e "${BLUE}Creating GitHub repo from template...${RESET}"
-gh repo create "$PROJECT_NAME" \
-  --template "$TEMPLATE_REPO" \
-  --"$VISIBILITY" \
-  --clone
+if [ "$VISIBILITY" = "private" ]; then
+  gh repo create "$PROJECT_NAME" \
+    --template "$TEMPLATE_REPO" \
+    --private \
+    --clone
+else
+  gh repo create "$PROJECT_NAME" \
+    --template "$TEMPLATE_REPO" \
+    --public \
+    --clone
+fi
 
 echo -e "${GREEN}✓ Repo created and cloned${RESET}"
 
