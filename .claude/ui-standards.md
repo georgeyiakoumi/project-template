@@ -234,6 +234,65 @@ import { cn } from '@/lib/utils'
 
 ---
 
+## Charts (if enabled)
+
+**The principle:** Charts use shadcn's `ChartContainer`, `ChartTooltip`, and `ChartLegend` wrappers around Recharts primitives. Charts inherit the brand palette through `--chart-*` CSS variables in `globals.css`, so they automatically adapt to light/dark mode.
+
+**Setup (already done if charts were enabled at project creation):**
+- `recharts` is installed as a dependency
+- `components/ui/chart.tsx` exists (added via `npx shadcn add chart`)
+- `--chart-1` through `--chart-5` tokens are defined in `globals.css` for both `:root` and `.dark`
+
+**Usage pattern:**
+```tsx
+"use client"
+
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
+
+const chartConfig = {
+  revenue: { label: "Revenue", color: "var(--chart-1)" },
+  expenses: { label: "Expenses", color: "var(--chart-2)" },
+} satisfies ChartConfig
+
+export function RevenueChart({ data }: { data: { month: string; revenue: number; expenses: number }[] }) {
+  return (
+    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+      <BarChart accessibilityLayer data={data}>
+        <CartesianGrid vertical={false} />
+        <XAxis dataKey="month" tickLine={false} axisLine={false} />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
+        <Bar dataKey="expenses" fill="var(--color-expenses)" radius={4} />
+      </BarChart>
+    </ChartContainer>
+  )
+}
+```
+
+**Key conventions:**
+- `"use client"` is required — Recharts uses browser APIs
+- `ChartContainer` generates `--color-{key}` CSS variables from the config — reference these in Recharts `fill` and `stroke` props
+- `accessibilityLayer` prop on the Recharts root adds keyboard navigation and screen reader support
+- Edit `--chart-1` through `--chart-5` in `globals.css` to match your brand palette
+- Available chart types: `BarChart`, `LineChart`, `AreaChart`, `PieChart`, `RadarChart`, `RadialBarChart`
+- Tooltip `indicator` accepts `"dot"`, `"line"`, or `"dashed"`
+
+**Chart checklist:**
+- [ ] All charts use `ChartContainer` wrapper (not raw Recharts)
+- [ ] Chart colours reference `--chart-*` tokens, not hardcoded hex values
+- [ ] Both light and dark mode chart tokens are defined in `globals.css`
+- [ ] `accessibilityLayer` prop is present on the Recharts root
+- [ ] Charts render correctly at mobile widths (test `min-h-[200px] w-full`)
+- [ ] `"use client"` directive is present on chart components
+
+---
+
 ## Visual branding
 
 **The principle:** Brand personality is expressed by customising shadcn's CSS variable layer — not by adding one-off styles outside the system. Brand decisions (tone, colour, typography, icons) are established during the UX process (see `ux-process.md` → Brand Identity) and applied here through the stack.

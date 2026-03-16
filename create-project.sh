@@ -217,6 +217,15 @@ case $PROJECT_TYPE in
     ;;
 esac
 
+# ── Charts ────────────────────────────────────────────────────
+echo ""
+read -p "$(echo -e ${BOLD})Will this project need charts or data visualisation? (y/n): $(echo -e ${RESET})" USE_CHARTS
+if [[ "$USE_CHARTS" == "y" || "$USE_CHARTS" == "Y" ]]; then
+  USE_CHARTS=true
+else
+  USE_CHARTS=false
+fi
+
 # ── Visibility ────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}Repo visibility:${RESET}"
@@ -232,6 +241,9 @@ echo -e "${BOLD}Summary:${RESET}"
 echo -e "  Name:       ${GREEN}$PROJECT_NAME${RESET}"
 echo -e "  Type:       ${CYAN}$PROJECT_TYPE_LABEL${RESET}"
 echo -e "  Stack:      $STACK_SUMMARY"
+if [ "$USE_CHARTS" = true ]; then
+  echo -e "  Charts:     Recharts + shadcn Chart"
+fi
 echo -e "  Visibility: $VISIBILITY"
 echo -e "  Location:   ${BLUE}$ACTIVE_DIR/$PROJECT_NAME${RESET}"
 echo ""
@@ -326,6 +338,66 @@ Set these environment variables in Render:
 Once deployed, copy the Render URL to NEXT_PUBLIC_STRAPI_URL in Netlify env vars.
 EOF
   echo -e "  ${YELLOW}↳ Added Strapi subfolder — see strapi/README.md to init${RESET}"
+fi
+
+# Add Recharts + chart tokens if charts enabled
+if [ "$USE_CHARTS" = true ]; then
+  # Add recharts to package.json dependencies
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' 's/"lucide-react": "[^"]*"/"lucide-react": "^0.460.0",\n    "recharts": "^2.15.0"/' package.json
+  else
+    sed -i 's/"lucide-react": "[^"]*"/"lucide-react": "^0.460.0",\n    "recharts": "^2.15.0"/' package.json
+  fi
+
+  # Add chart colour tokens to globals.css (light mode)
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' '/--radius: 0.5rem;/a\
+\
+    /* ── Chart colours ─────────────────────────────────────────\
+       Used by shadcn Chart component. Edit to match your brand.\
+    ───────────────────────────────────────────────────────── */\
+    --chart-1: 220 70% 50%;\
+    --chart-2: 160 60% 45%;\
+    --chart-3: 30 80% 55%;\
+    --chart-4: 280 65% 60%;\
+    --chart-5: 340 75% 55%;
+' app/globals.css
+  else
+    sed -i '/--radius: 0.5rem;/a\
+\
+    /* ── Chart colours ─────────────────────────────────────────\
+       Used by shadcn Chart component. Edit to match your brand.\
+    ───────────────────────────────────────────────────────── */\
+    --chart-1: 220 70% 50%;\
+    --chart-2: 160 60% 45%;\
+    --chart-3: 30 80% 55%;\
+    --chart-4: 280 65% 60%;\
+    --chart-5: 340 75% 55%;
+' app/globals.css
+  fi
+
+  # Add dark mode chart tokens
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' '/--ring: 212.7 26.8% 83.9%;/a\
+\
+    --chart-1: 220 70% 50%;\
+    --chart-2: 160 60% 45%;\
+    --chart-3: 30 80% 55%;\
+    --chart-4: 280 65% 60%;\
+    --chart-5: 340 75% 55%;
+' app/globals.css
+  else
+    sed -i '/--ring: 212.7 26.8% 83.9%;/a\
+\
+    --chart-1: 220 70% 50%;\
+    --chart-2: 160 60% 45%;\
+    --chart-3: 30 80% 55%;\
+    --chart-4: 280 65% 60%;\
+    --chart-5: 340 75% 55%;
+' app/globals.css
+  fi
+
+  echo -e "  ${YELLOW}↳ Added Recharts + chart colour tokens${RESET}"
 fi
 
 echo -e "${GREEN}✓ Scaffold configured${RESET}"
@@ -601,6 +673,13 @@ echo ""
 echo -e "${BLUE}Installing dependencies...${RESET}"
 npm install
 echo -e "${GREEN}✓ Dependencies installed${RESET}"
+
+# ── Add shadcn chart component if charts enabled ──────────────
+if [ "$USE_CHARTS" = true ]; then
+  echo -e "${BLUE}Adding shadcn Chart component...${RESET}"
+  npx shadcn@latest add chart -y
+  echo -e "${GREEN}✓ Chart component added${RESET}"
+fi
 
 # ── Set up .env.local ─────────────────────────────────────────
 if [ -f ".env.example" ]; then
