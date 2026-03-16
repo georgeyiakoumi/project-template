@@ -230,11 +230,18 @@ if [[ "$CONFIRM" != "y" && "$CONFIRM" != "Y" ]]; then
   exit 0
 fi
 
-# ── Create repo from template ─────────────────────────────────
+# ── Check for existing local folder ───────────────────────────
 if [ -d "$ACTIVE_DIR/$PROJECT_NAME" ]; then
-  echo -e "${RED}✗ A folder named '$PROJECT_NAME' already exists at $ACTIVE_DIR${RESET}"
-  echo -e "  Remove it or pick a different name."
-  exit 1
+  echo -e "${YELLOW}⚠ A folder named '$PROJECT_NAME' already exists at $ACTIVE_DIR${RESET}"
+  read -p "Delete it and continue? (y/n): " DELETE_FOLDER
+  if [[ "$DELETE_FOLDER" == "y" || "$DELETE_FOLDER" == "Y" ]]; then
+    rm -rf "$ACTIVE_DIR/$PROJECT_NAME"
+    echo -e "${GREEN}✓ Deleted $ACTIVE_DIR/$PROJECT_NAME${RESET}"
+  else
+    echo -e "  Pick a different name."
+    exec "$0"
+    exit 0
+  fi
 fi
 
 cd "$ACTIVE_DIR"
