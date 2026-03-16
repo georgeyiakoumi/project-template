@@ -35,7 +35,7 @@ Download `create-project.sh` from this repo and store it somewhere permanent (e.
 
 ```bash
 # 1. Download the script
-curl -o ~/Scripts/create-project.sh https://raw.githubusercontent.com/YOUR_USERNAME/project-template/main/create-project.sh
+curl -o ~/Scripts/create-project.sh https://raw.githubusercontent.com/georgeyiakoumi/project-template/main/create-project.sh
 
 # 2. Make it executable
 chmod +x ~/Scripts/create-project.sh
